@@ -5,6 +5,7 @@ import stat
 import traceback
 import paramiko
 
+# All tasks inherit this. Has helper functions for connecting to the ssh server.
 class TaskBase:
     runDefault = False
     log = None
@@ -22,7 +23,8 @@ class TaskBase:
         self.username = username
         self.password = password
 
-    def runDefaults(self, sftpclient=None):
+    def runDefaults(self, sftpclient=None) -> None:
+        """Load all classes that extend TaskBase, and run them."""
         self.log("Running")
         try:
             for theclass in TaskBase.__subclasses__():
@@ -33,24 +35,27 @@ class TaskBase:
             self.log(str(e))
         except Exception as e:
             self.log(traceback.format_exc())
-#            self.log(e)
             raise(e)
     
-    def log(self, message):
+    def log(self, message) -> None:
+        """Just simple shortcut to the default log"""
         self.loggableclass.log(message)
 
-    def run(self):
+    def run(self) -> None:
         # TODO: Error handling
         if self.needsSFTP:
-            self.publickey = Certificate().createOrLoadCertificate()
+            self.publickey = Certificate().loadOrCreateCertificate()
             self.log("Connecting to: " + self.host)
-            
+            # TODO: Don't repeatedly do this in case we have more tasks.
+            # TODO: If we get more tasks, handle using an existing certificate
             self.client = Connection(host=self.host,
                                 user=self.username,
                                 connect_kwargs={"password": self.password}
-                                ).sftp()
+                                ).sftp() # Connect! :3
         
     def assertServerPermissions(self, filename, chmod) -> bool:
+        """Check that the correct permission settings exists for a file or directory on the server."""
+        # TODO: Raise a question if we want to change the chmod..
         mode = self.client.stat(filename).st_mode
         type = "folder" if stat.S_ISDIR(mode) else "file"
         if PermissionHelper.NumberToChmod(mode) == str(chmod):

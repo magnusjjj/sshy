@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter.scrolledtext import ScrolledText
 from sshy_app.tasks import *
 
+# This is the main GUI for the application.
 class Gui(tk.Frame):
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
@@ -30,9 +31,7 @@ class Gui(tk.Frame):
         self.passwordLabel.grid(padx=5, pady=(10,0), sticky=tk.NW)
         self.passwordEntry = tk.Entry(self, show="*")
         self.passwordEntry.grid(padx=5, sticky=tk.N+tk.E+tk.W)
-        
-
-    
+            
         self.doItButton = tk.Button(self, text='Do it!',
             command=self.doit)
         self.doItButton.grid(padx=5, pady=(10,0))
@@ -43,6 +42,7 @@ class Gui(tk.Frame):
         self.logEntry.grid(padx=5, sticky=tk.N+tk.E+tk.W+tk.S, pady=(0,5))
 
     def doit(self):
+        # Run the main addition task.
         TaskBase.TaskBase(self, host=self.hostEntry.get(), username=self.userEntry.get(), password=self.passwordEntry.get()).runDefaults()
 
     def log(self, message):
